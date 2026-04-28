@@ -10,9 +10,13 @@ import rembg
 import torch
 import trimesh
 from PIL import Image
+from trimesh.visual import TextureVisuals
+from trimesh.visual.material import PBRMaterial
+from trimesh.smoothing import filter_taubin
 
 warnings.filterwarnings("ignore", category=RuntimeWarning, message="invalid value encountered in divide")
 
+from tsr.bake_texture import bake_texture
 from tsr.system import TSR
 from tsr.utils import remove_background, repair_mesh, resize_foreground, to_gradio_3d_orientation
 
@@ -73,7 +77,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--threshold",
         type=float,
-        default=5.0,
+        default=7.0,
         help="Mesh extraction threshold.",
     )
     return parser
@@ -118,7 +122,7 @@ def collect_input_images(input_args: list, project_root: Path) -> list[Path]:
             raise FileNotFoundError(f"Input path not found: {input_path}")
 
     unique_paths = list(dict.fromkeys(p for p in collected if p.suffix.lower() == ".png"))
-    
+
     if not unique_paths:
         raise FileNotFoundError("No PNG images were found in the provided input paths.")
     return unique_paths
@@ -126,7 +130,12 @@ def collect_input_images(input_args: list, project_root: Path) -> list[Path]:
 
 def prepare_model_input(input_path: Path, foreground_ratio: float, rembg_session) -> Image.Image:
     with Image.open(input_path) as raw_image:
-        processed_image = remove_background(raw_image, rembg_session=rembg_session)
+        processed_image = remove_background(
+            raw_image,
+            rembg_session=rembg_session,
+            post_process_mask=True,
+            alpha_matting=False
+        )
 
     if processed_image.mode != "RGBA":
         processed_image = processed_image.convert("RGBA")
@@ -165,8 +174,8 @@ def resolve_output_path(
     subfolder = output_dir / input_path.stem
     subfolder.mkdir(parents=True, exist_ok=True)
 
-    # Save the obj inside that subfolder
-    return subfolder / f"{input_path.stem}.obj"
+    # Save the glb inside that subfolder
+    return subfolder / "3d Object.glb"
 
 
 def load_model(args: argparse.Namespace) -> TSR:
@@ -249,22 +258,56 @@ def generate_mesh_for_image(
     mesh = trimesh.Trimesh(
         vertices=meshes[0].vertices,
         faces=meshes[0].faces,
-        vertex_colors=meshes[0].visual.vertex_colors,
         process=False,
     )
+
     mesh = repair_mesh(mesh, voxel_resolution=resolve_repair_resolution(args.mc_resolution))
+
+    # Crank this up to 100 to completely melt away the voxel staircase effect
+    filter_taubin(mesh, iterations=100)
+    # ------------------------------------------------
+
     print(f"        ✓ Completed in {time.time() - t_start:.2f}s")
+
+    # print("  [4.5/5] Applying texture...")
+    # t_start = time.time()
+    # texture_res = 100
+    # bake_data = bake_texture(mesh, model, scene_codes[0], texture_res)
+    # texture_img = Image.fromarray((bake_data["colors"] * 255).astype(np.uint8)).convert("RGB")
+    #
+    # # Use the cleaner imports we set up at the top
+    # material = PBRMaterial(
+    #     roughnessFactor=1.0,
+    #     metallicFactor=0.0,
+    #     baseColorTexture=texture_img
+    # )
+    #
+    # visual = TextureVisuals(
+    #     uv=bake_data["uvs"],
+    #     image=texture_img,
+    #     material=material
+    # )
+    #
+    # mesh = trimesh.Trimesh(
+    #     vertices=mesh.vertices[bake_data["vmapping"]],
+    #     faces=bake_data["indices"],
+    #     visual=visual,
+    #     process=False
+    # )
+    # print(f"        ✓ Completed in {time.time() - t_start:.2f}s")
 
     print("  [5/5] Applying rotation and exporting...")
     t_start = time.time()
     mesh = to_gradio_3d_orientation(mesh)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    mesh.export(output_path, include_normals=True, include_color=True)
+
+    # Export as GLB so it keeps the texture and material settings packed in one file!
+    glb_output_path = output_path.with_suffix('.glb')
+    mesh.export(glb_output_path)
     final_input.save(output_path.parent / input_path.name)
 
     print(f"        ✓ Completed in {time.time() - t_start:.2f}s")
-    print(f"  ✓ Saved to {output_path.parent}")
 
 
 def main() -> None:
@@ -287,7 +330,7 @@ def main() -> None:
 
         print(f"Processing {len(input_paths)} image(s)")
         print("Initializing background removal...\n")
-        rembg_session = rembg.new_session()
+        rembg_session = rembg.new_session("isnet-general-use")
 
         total_start_time = time.time()
         for input_path in input_paths:

@@ -4,6 +4,7 @@ import xatlas
 import trimesh
 import moderngl
 from PIL import Image
+from scipy import ndimage # Used for smearing the edge colors
 
 
 def make_atlas(mesh, texture_resolution, texture_padding):
@@ -135,18 +136,44 @@ def rasterize_position_atlas(
 
 
 def positions_to_colors(model, scene_code, positions_texture, texture_resolution):
-    positions = torch.tensor(positions_texture.reshape(-1, 4)[:, :-1])
+    flat_positions = positions_texture.reshape(-1, 4)
+
+    # 1. Find valid pixels
+    valid_mask = flat_positions[:, 3] > 0.0
+    valid_positions = torch.tensor(
+        flat_positions[valid_mask, :3],
+        device=scene_code.device
+    )
+
+    # 2. Query NeRF model
     with torch.no_grad():
         queried_grid = model.renderer.query_triplane(
             model.decoder,
-            positions,
+            valid_positions,
             scene_code,
         )
-    rgb_f = queried_grid["color"].numpy().reshape(-1, 3)
-    rgba_f = np.insert(rgb_f, 3, positions_texture.reshape(-1, 4)[:, -1], axis=1)
-    rgba_f[rgba_f[:, -1] == 0.0] = [0, 0, 0, 0]
-    return rgba_f.reshape(texture_resolution, texture_resolution, 4)
+    valid_colors = queried_grid["color"].cpu().numpy()
 
+    # 3. Paint valid colors onto a 2D RGB array
+    color_map = np.zeros((flat_positions.shape[0], 3), dtype=np.float32)
+    color_map[valid_mask] = valid_colors
+    color_map_2d = color_map.reshape(texture_resolution, texture_resolution, 3)
+
+    # 4. EDGE PADDING (The Magic Fix for the holes)
+    mask_2d = valid_mask.reshape(texture_resolution, texture_resolution)
+    empty_space = ~mask_2d
+
+    # Get the coordinates of the nearest valid pixel for every empty pixel
+    indices = ndimage.distance_transform_edt(empty_space, return_distances=False, return_indices=True)
+
+    # Smear the colors outward to fill the entire image, destroying any transparent gaps
+    padded_color_map = color_map_2d[tuple(indices)]
+
+    # 5. Return as RGBA (Alpha fully opaque to prevent viewer transparency bugs)
+    final_rgba = np.ones((texture_resolution, texture_resolution, 4), dtype=np.float32)
+    final_rgba[..., :3] = padded_color_map
+
+    return final_rgba
 
 def bake_texture(mesh, model, scene_code, texture_resolution):
     texture_padding = round(max(2, texture_resolution / 256))
