@@ -1,7 +1,9 @@
+# run.py
 import argparse
 import sys
 import time
 import warnings
+import shutil
 from pathlib import Path
 from typing import Optional
 
@@ -10,13 +12,14 @@ import rembg
 import torch
 import trimesh
 from PIL import Image
-from trimesh.visual import TextureVisuals
-from trimesh.visual.material import PBRMaterial
-from trimesh.smoothing import filter_taubin
+
+# Swapped to Laplacian for the flat/smooth look
+from trimesh.smoothing import filter_laplacian
 
 warnings.filterwarnings("ignore", category=RuntimeWarning, message="invalid value encountered in divide")
+warnings.filterwarnings("ignore", category=UserWarning, module="PIL.Image")
+warnings.filterwarnings("ignore", message=".*Thresholded incomplete Cholesky decomposition failed.*")
 
-from tsr.bake_texture import bake_texture
 from tsr.system import TSR
 from tsr.utils import remove_background, repair_mesh, resize_foreground, to_gradio_3d_orientation
 
@@ -71,20 +74,19 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--chunk-size",
         type=int,
-        default=8192,
+        default=16384,
         help="Renderer chunk size. Prevents VRAM spillover/freezing.",
     )
     parser.add_argument(
         "--threshold",
         type=float,
-        default=7.0,
+        default=25.0,
         help="Mesh extraction threshold.",
     )
     return parser
 
 
 def load_custom_state_dict(ckpt_path: Path) -> dict:
-    """Load checkpoint state dict, handling both old and new PyTorch formats."""
     try:
         state_dict = torch.load(ckpt_path, map_location="cpu", weights_only=True)
     except TypeError:
@@ -103,7 +105,6 @@ def load_custom_state_dict(ckpt_path: Path) -> dict:
 
 
 def collect_input_images(input_args: list, project_root: Path) -> list[Path]:
-    """Collect and validate PNG image files from input arguments."""
     if not input_args:
         dataset_dir = project_root / "dataset"
         paths = sorted(dataset_dir.glob("*.png"))
@@ -130,6 +131,7 @@ def collect_input_images(input_args: list, project_root: Path) -> list[Path]:
 
 def prepare_model_input(input_path: Path, foreground_ratio: float, rembg_session) -> Image.Image:
     with Image.open(input_path) as raw_image:
+        raw_image = raw_image.convert("RGBA")
         processed_image = remove_background(
             raw_image,
             rembg_session=rembg_session,
@@ -152,7 +154,6 @@ def resolve_output_dir(current_dir: Path, explicit_output_dir: str | None) -> Pa
     if explicit_output_dir:
         output_dir = Path(explicit_output_dir).resolve()
     else:
-        # Default to an "outputs" folder inside TripoSR
         output_dir = current_dir / "outputs"
 
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -170,16 +171,12 @@ def resolve_output_path(
             raise ValueError("--output can only be used when processing a single image.")
         return Path(explicit_output).resolve()
 
-    # Create a subfolder named exactly after the input picture
     subfolder = output_dir / input_path.stem
     subfolder.mkdir(parents=True, exist_ok=True)
-
-    # Save the glb inside that subfolder
-    return subfolder / "3d Object.glb"
+    return subfolder / f"{input_path.stem}.glb"
 
 
 def load_model(args: argparse.Namespace) -> TSR:
-    """Load TripoSR model with optional custom checkpoint."""
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = TSR.from_pretrained(
         args.pretrained_model_name_or_path,
@@ -209,8 +206,23 @@ def build_threshold_fallbacks(threshold: float) -> list[float]:
 
 
 def resolve_repair_resolution(mc_resolution: int) -> int:
-    """Determine voxel resolution for mesh repair."""
-    return 300
+    return 400
+
+
+def get_adaptive_smoothing_iterations(mesh: trimesh.Trimesh) -> int:
+    """
+    Dynamically calculates the optimal number of Laplacian smoothing iterations.
+    Dense/complex meshes safely absorb more passes to remove blocks.
+    Simple/thin meshes get fewer passes to prevent melting.
+    """
+    if len(mesh.faces) == 0:
+        return 0
+
+    # Heuristic: 1 iteration per 1500 faces
+    calculated_iters = int(len(mesh.faces) / 1500)
+
+    # Clamp to ensure it always smooths a little, but never melts the object
+    return max(15, min(85, calculated_iters))
 
 
 def generate_mesh_for_image(
@@ -221,15 +233,14 @@ def generate_mesh_for_image(
         args: argparse.Namespace,
         rembg_session,
 ) -> None:
-    """Generate 3D mesh from input image through full pipeline."""
     print(f"\n--- Generating mesh for {input_path.name} ---")
 
-    print("  [1/5] Removing background...")
+    print("  [1/8] Removing background...")
     t_start = time.time()
     final_input = prepare_model_input(input_path, args.foreground_ratio, rembg_session)
     print(f"        ✓ Completed in {time.time() - t_start:.2f}s")
 
-    print("  [2/5] Running TripoSR model...")
+    print("  [2/8] Running TripoSR model...")
     t_start = time.time()
     with torch.no_grad():
         scene_codes = model([final_input], device=device)
@@ -237,7 +248,7 @@ def generate_mesh_for_image(
             torch.cuda.synchronize()
         print(f"        ✓ Completed in {time.time() - t_start:.2f}s")
 
-        print("  [3/5] Extracting mesh...")
+        print("  [3/8] Extracting mesh...")
         t_start = time.time()
         meshes = model.extract_mesh(
             scene_codes,
@@ -253,65 +264,51 @@ def generate_mesh_for_image(
     if not meshes or len(meshes[0].vertices) == 0 or len(meshes[0].faces) == 0:
         raise RuntimeError(f"Mesh extraction returned no geometry for {input_path}")
 
-    print("  [4/5] Repairing mesh...")
+    print("  [4/8] Repairing mesh...")
     t_start = time.time()
     mesh = trimesh.Trimesh(
         vertices=meshes[0].vertices,
         faces=meshes[0].faces,
         process=False,
     )
-
     mesh = repair_mesh(mesh, voxel_resolution=resolve_repair_resolution(args.mc_resolution))
-
-    # Crank this up to 100 to completely melt away the voxel staircase effect
-    filter_taubin(mesh, iterations=100)
-    # ------------------------------------------------
-
     print(f"        ✓ Completed in {time.time() - t_start:.2f}s")
 
-    # print("  [4.5/5] Applying texture...")
-    # t_start = time.time()
-    # texture_res = 100
-    # bake_data = bake_texture(mesh, model, scene_codes[0], texture_res)
-    # texture_img = Image.fromarray((bake_data["colors"] * 255).astype(np.uint8)).convert("RGB")
-    #
-    # # Use the cleaner imports we set up at the top
-    # material = PBRMaterial(
-    #     roughnessFactor=1.0,
-    #     metallicFactor=0.0,
-    #     baseColorTexture=texture_img
-    # )
-    #
-    # visual = TextureVisuals(
-    #     uv=bake_data["uvs"],
-    #     image=texture_img,
-    #     material=material
-    # )
-    #
-    # mesh = trimesh.Trimesh(
-    #     vertices=mesh.vertices[bake_data["vmapping"]],
-    #     faces=bake_data["indices"],
-    #     visual=visual,
-    #     process=False
-    # )
-    # print(f"        ✓ Completed in {time.time() - t_start:.2f}s")
+    print("  [5/8] Exporting Unsmoothed Preview...")
+    t_start = time.time()
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    unsmoothed_mesh = to_gradio_3d_orientation(mesh.copy())
+    unsmoothed_mesh.export(output_path.parent / f"{input_path.stem}_unsmoothed.glb")
+    print(f"        ✓ Completed in {time.time() - t_start:.2f}s")
 
-    print("  [5/5] Applying rotation and exporting...")
+    print("  [6/8] Smoothing Mesh...")
+    t_start = time.time()
+    optimal_iters = get_adaptive_smoothing_iterations(mesh)
+    print(f"        -> Using {optimal_iters} iterations for {len(mesh.faces):,} faces")
+    filter_laplacian(mesh, iterations=optimal_iters)
+    print(f"        ✓ Completed in {time.time() - t_start:.2f}s")
+
+    print("  [7/8] Optimizing Mesh...")
+    t_start = time.time()
+    try:
+        mesh = mesh.simplify_quadric_decimation(0.5)
+        print(f"        ✓ Completed in {time.time() - t_start:.2f}s")
+    except Exception as e:
+        print(f"        ! Decimation skipped: {e}")
+
+    print("  [8/8] Applying rotation and exporting...")
     t_start = time.time()
     mesh = to_gradio_3d_orientation(mesh)
 
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+    mesh.export(output_path)
 
-    # Export as GLB so it keeps the texture and material settings packed in one file!
-    glb_output_path = output_path.with_suffix('.glb')
-    mesh.export(glb_output_path)
-    final_input.save(output_path.parent / input_path.name)
+    shutil.copy(input_path, output_path.parent / f"{input_path.stem}_original.png")
+    final_input.save(output_path.parent / f"{input_path.stem}_edited.png")
 
     print(f"        ✓ Completed in {time.time() - t_start:.2f}s")
 
 
 def main() -> None:
-    """Main pipeline: load model, process images, generate meshes."""
     configure_console_output()
     parser = build_parser()
     args = parser.parse_args()

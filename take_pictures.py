@@ -1,3 +1,4 @@
+# take_pictures.py
 import time
 from pathlib import Path
 
@@ -14,12 +15,9 @@ DEFAULT_COLOR = [128, 128, 128, 255]
 
 
 def load_mesh_with_colors(file_path: Path) -> o3d.geometry.TriangleMesh:
-    """Load mesh from file (supporting GLB Scenes) and convert to Open3D with proper vertex colors."""
     t_mesh = trimesh.load(str(file_path), process=False)
 
-    # If the loaded object is a Scene (common for GLB), combine it into one geometry
     if isinstance(t_mesh, trimesh.Scene):
-        # Updated to comply with the new trimesh API (fixes the DeprecationWarning)
         t_mesh = t_mesh.to_geometry()
 
     if not hasattr(t_mesh.visual, 'vertex_colors') or len(t_mesh.visual.vertex_colors) == 0:
@@ -39,7 +37,6 @@ def load_mesh_with_colors(file_path: Path) -> o3d.geometry.TriangleMesh:
 
 
 def configure_renderer(vis: o3d.visualization.Visualizer) -> None:
-    """Configure rendering options."""
     opt = vis.get_render_option()
     opt.background_color = np.asarray([1, 1, 1])
     opt.light_on = True
@@ -49,7 +46,6 @@ def configure_renderer(vis: o3d.visualization.Visualizer) -> None:
 
 
 def position_camera(vis: o3d.visualization.Visualizer, mesh: o3d.geometry.TriangleMesh) -> None:
-    """Position and auto-zoom camera to frame mesh."""
     bbox = mesh.get_axis_aligned_bounding_box()
     mesh_center = bbox.get_center()
 
@@ -61,7 +57,6 @@ def position_camera(vis: o3d.visualization.Visualizer, mesh: o3d.geometry.Triang
 
 
 def render_mesh_to_image(mesh: o3d.geometry.TriangleMesh, output_path: Path) -> None:
-    """Render mesh to high-quality PNG image."""
     vis = o3d.visualization.Visualizer()
     vis.create_window(window_name="Render", width=RENDER_WIDTH, height=RENDER_HEIGHT, visible=False)
     vis.add_geometry(mesh)
@@ -81,7 +76,6 @@ def render_mesh_to_image(mesh: o3d.geometry.TriangleMesh, output_path: Path) -> 
 
 
 def take_pictures() -> None:
-    """Generate 3D preview images for all .glb models in the outputs folder."""
     script_dir = Path(__file__).resolve().parent
     output_dir = script_dir / "TripoSR" / "outputs"
 
@@ -99,8 +93,12 @@ def take_pictures() -> None:
 
     successful = 0
     for file_path in model_files:
-        image_path = file_path.parent / "3d_preview.png"
-        model_name = file_path.parent.name
+        image_path = file_path.with_suffix(".png")
+
+        if "unsmoothed" in file_path.name.lower():
+            model_name = f"{file_path.stem} (Unsmoothed)"
+        else:
+            model_name = f"{file_path.stem} (Final)"
 
         try:
             print(f"  {model_name}...", end=" ", flush=True)

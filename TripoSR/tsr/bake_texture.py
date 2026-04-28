@@ -4,8 +4,8 @@ import xatlas
 import trimesh
 import moderngl
 from PIL import Image
-from scipy import ndimage # Used for smearing the edge colors
-
+from scipy import ndimage
+from tqdm import tqdm
 
 def make_atlas(mesh, texture_resolution, texture_padding):
     atlas = xatlas.Atlas()
@@ -21,7 +21,6 @@ def make_atlas(mesh, texture_resolution, texture_padding):
         "indices": indices,
         "uvs": uvs,
     }
-
 
 def rasterize_position_atlas(
     mesh, atlas_vmapping, atlas_indices, atlas_uvs, texture_resolution, texture_padding
@@ -71,10 +70,8 @@ def rasterize_position_atlas(
                 vec2 b = gl_in[bidx].gl_Position.xy;
                 vec3 aCol = vg_pos[aidx];
                 vec3 bCol = vg_pos[bidx];
-
                 vec2 dir = normalize((b - a) * u_resolution);
                 vec2 offset = vec2(-dir.y, dir.x) * u_dilation / u_resolution;
-
                 gl_Position = vec4(a + offset, 0.0, 1.0);
                 vf_pos = aCol;
                 EmitVertex();
@@ -129,50 +126,41 @@ def rasterize_position_atlas(
     basic_vao.render()
 
     fbo_bytes = fbo.color_attachments[0].read()
-    fbo_np = np.frombuffer(fbo_bytes, dtype="f4").reshape(
+    return np.frombuffer(fbo_bytes, dtype="f4").reshape(
         texture_resolution, texture_resolution, 4
     )
-    return fbo_np
-
 
 def positions_to_colors(model, scene_code, positions_texture, texture_resolution):
     flat_positions = positions_texture.reshape(-1, 4)
-
-    # 1. Find valid pixels
     valid_mask = flat_positions[:, 3] > 0.0
     valid_positions = torch.tensor(
         flat_positions[valid_mask, :3],
         device=scene_code.device
     )
 
-    # 2. Query NeRF model
-    with torch.no_grad():
-        queried_grid = model.renderer.query_triplane(
-            model.decoder,
-            valid_positions,
-            scene_code,
-        )
-    valid_colors = queried_grid["color"].cpu().numpy()
+    chunk_size = model.renderer.chunk_size
+    valid_colors = []
 
-    # 3. Paint valid colors onto a 2D RGB array
+    print(f"    -> Querying NeRF for {len(valid_positions)} pixels...")
+    for i in tqdm(range(0, len(valid_positions), chunk_size), desc="      Baking", leave=False):
+        chunk = valid_positions[i : i + chunk_size]
+        with torch.no_grad():
+            out = model.renderer.query_triplane(model.decoder, chunk, scene_code)
+            valid_colors.append(out["color"].cpu().numpy())
+
+    valid_colors = np.concatenate(valid_colors, axis=0)
+
     color_map = np.zeros((flat_positions.shape[0], 3), dtype=np.float32)
     color_map[valid_mask] = valid_colors
     color_map_2d = color_map.reshape(texture_resolution, texture_resolution, 3)
 
-    # 4. EDGE PADDING (The Magic Fix for the holes)
     mask_2d = valid_mask.reshape(texture_resolution, texture_resolution)
     empty_space = ~mask_2d
-
-    # Get the coordinates of the nearest valid pixel for every empty pixel
     indices = ndimage.distance_transform_edt(empty_space, return_distances=False, return_indices=True)
-
-    # Smear the colors outward to fill the entire image, destroying any transparent gaps
     padded_color_map = color_map_2d[tuple(indices)]
 
-    # 5. Return as RGBA (Alpha fully opaque to prevent viewer transparency bugs)
     final_rgba = np.ones((texture_resolution, texture_resolution, 4), dtype=np.float32)
     final_rgba[..., :3] = padded_color_map
-
     return final_rgba
 
 def bake_texture(mesh, model, scene_code, texture_resolution):
