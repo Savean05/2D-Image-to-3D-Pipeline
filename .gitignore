@@ -1,0 +1,11 @@
+﻿@
+*.blend
+*.blend1
+*.ckpt
+__pycache__/
+*.pyc
+venv/
+.venv/
+outputs/
+TripoSR/outputs/
+@

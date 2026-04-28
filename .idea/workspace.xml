@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="ALL" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="d6518b3a-d2e0-410a-9717-e912ac97fa47" name="Changes" comment="Removed extra things." />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ChangesViewManager">
+    <option name="groupingKeys">
+      <option value="directory" />
+      <option value="repository" />
+    </option>
+  </component>
+  <component name="EmbeddingIndexingInfo">
+    <option name="cachedIndexableFilesCount" value="125" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="FlaskConsoleOptions" custom-start-script="import sys; print('Python %s on %s' % (sys.version, sys.platform)); sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo, NoAppException&#10;for module in [&quot;main.py&quot;, &quot;wsgi.py&quot;, &quot;app.py&quot;]:&#10;    try: locals().update(ScriptInfo(app_import_path=module, create_app=None).load_app().make_shell_context()); print(&quot;\nFlask App: %s&quot; % app.import_name); break&#10;    except NoAppException: pass">
+    <envs>
+      <env key="FLASK_APP" value="app" />
+    </envs>
+    <option name="myCustomStartScript" value="import sys; print('Python %s on %s' % (sys.version, sys.platform)); sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo, NoAppException&#10;for module in [&quot;main.py&quot;, &quot;wsgi.py&quot;, &quot;app.py&quot;]:&#10;    try: locals().update(ScriptInfo(app_import_path=module, create_app=None).load_app().make_shell_context()); print(&quot;\nFlask App: %s&quot; % app.import_name); break&#10;    except NoAppException: pass" />
+    <option name="myEnvs">
+      <map>
+        <entry key="FLASK_APP" value="app" />
+      </map>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {}
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Savean05/2D-Image-to-3D-Pipeline.git&quot;,
+    &quot;accountId&quot;: &quot;98521bb2-8533-4ecf-80d2-fb5e1a5adeb5&quot;
+  }
+}</component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 3,
+  &quot;fromUser&quot;: false
+}</component>
+  <component name="ProjectId" id="3CizvFOKrKFQYhu6kIdtlmT79se" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python.bake_texture.executor": "Run",
+    "Python.gradio_app.executor": "Run",
+    "Python.isosurface.executor": "Run",
+    "Python.make_3d.executor": "Run",
+    "Python.run.executor": "Run",
+    "Python.take_pictures.executor": "Run",
+    "Python.train.executor": "Run",
+    "Python.utils.executor": "Run",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "main",
+    "junie.onboarding.icon.badge.shown": "true",
+    "last_opened_file_path": "C:/Users/savea/Desktop/Other/Projects/2D Image to 3D model generation",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "ml.llm.AcpAgentsConfigurable",
+    "to.speed.mode.migration.done": "true",
+    "vue.rearranger.settings.migration": "true"
+  },
+  "keyToStringList": {
+    "ChangesTree.GroupingKeys": [
+      "directory",
+      "repository"
+    ],
+    "GitStage.ChangesTree.GroupingKeys": [
+      "directory",
+      "module",
+      "repository"
+    ]
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\savea\Desktop\Other\Projects\2D Image to 3D model generation" />
+      <recent name="C:\Users\savea\Desktop\Other\Projects\2D Image to 3D model generation\TripoSR" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\savea\Desktop\Other\Projects\2D Image to 3D model generation" />
+      <recent name="C:\Users\savea\Desktop\Other\Projects\2D Image to 3D model generation\TripoSR" />
+      <recent name="C:\Users\savea\Desktop\Other\Projects\2D Image to 3D model generation\TripoSR\dataset" />
+    </key>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-python-sdk-b63d5a1f7c97-b61e75351b1f-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-261.22158.340" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="d6518b3a-d2e0-410a-9717-e912ac97fa47" name="Changes" comment="" />
+      <created>1776883406416</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1776883406416</updated>
+      <workItem from="1776883407430" duration="234000" />
+      <workItem from="1776883650854" duration="949000" />
+      <workItem from="1776884612806" duration="802000" />
+      <workItem from="1777321634279" duration="2791000" />
+      <workItem from="1777324633106" duration="909000" />
+      <workItem from="1777325636611" duration="16327000" />
+      <workItem from="1777342405204" duration="359000" />
+      <workItem from="1777342809276" duration="4208000" />
+      <workItem from="1777347550636" duration="1000" />
+      <workItem from="1777347614671" duration="1830000" />
+      <workItem from="1777349470160" duration="20108000" />
+      <workItem from="1777395787316" duration="9291000" />
+      <workItem from="1777406729700" duration="11570000" />
+    </task>
+    <task id="LOCAL-00001" summary="Updated README.MD and updated and updated smoothing intensity.">
+      <option name="closed" value="true" />
+      <created>1777415458214</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1777415458214</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Updated images">
+      <option name="closed" value="true" />
+      <created>1777415618923</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1777415618923</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Updated images and run.py.">
+      <option name="closed" value="true" />
+      <created>1777418053676</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1777418053676</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Removed extra things.">
+      <option name="closed" value="true" />
+      <created>1777418548197</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1777418548197</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Updated README.MD and updated and updated smoothing intensity." />
+    <MESSAGE value="Updated images" />
+    <MESSAGE value="Updated images and run.py." />
+    <MESSAGE value="Removed extra things." />
+    <option name="LAST_COMMIT_MESSAGE" value="Removed extra things." />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/2D_Image_to_3D_model_generation$train.coverage" NAME="train Coverage Results" MODIFIED="1777410465894" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/2D_Image_to_3D_model_generation$run.coverage" NAME="run Coverage Results" MODIFIED="1777416301077" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TripoSR" />
+    <SUITE FILE_PATH="coverage/2D_Image_to_3D_model_generation$make_3d.coverage" NAME="make_3d Coverage Results" MODIFIED="1777355249375" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TripoSR" />
+    <SUITE FILE_PATH="coverage/2D_Image_to_3D_model_generation$isosurface.coverage" NAME="isosurface Coverage Results" MODIFIED="1777327631494" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TripoSR/tsr/models" />
+    <SUITE FILE_PATH="coverage/2D_Image_to_3D_model_generation$gradio_app.coverage" NAME="gradio_app Coverage Results" MODIFIED="1777341065528" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TripoSR" />
+    <SUITE FILE_PATH="coverage/2D_Image_to_3D_model_generation$utils.coverage" NAME="utils Coverage Results" MODIFIED="1777368873813" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TripoSR/tsr" />
+    <SUITE FILE_PATH="coverage/2D_Image_to_3D_model_generation$bake_texture.coverage" NAME="bake_texture Coverage Results" MODIFIED="1777340493432" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/TripoSR/tsr" />
+    <SUITE FILE_PATH="coverage/2D_Image_to_3D_model_generation$take_pictures.coverage" NAME="take_pictures Coverage Results" MODIFIED="1777417742444" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+  </component>
+</project>
