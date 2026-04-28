@@ -1,0 +1,21 @@
+@'
+# Environments
+.venv/
+
+# AI Model Weights
+*.ckpt
+*.pth
+
+# IDE and OS files
+.idea/
+.vscode/
+__pycache__/
+.DS_Store
+
+# 3D Outputs
+# Ignore the big 3D models (.obj/.glb)
+TripoSR/outputs/**/*.obj
+TripoSR/outputs/**/*.glb
+
+# Note: .png files are naturally allowed because we only ignored .obj and .glb above.
+'@ | Set-Content -Path .gitignore -Encoding ASCII
