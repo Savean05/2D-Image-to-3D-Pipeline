@@ -1,9 +1,7 @@
-# run.py
 import argparse
 import sys
 import time
 import warnings
-import shutil
 from pathlib import Path
 from typing import Optional
 
@@ -13,7 +11,7 @@ import torch
 import trimesh
 from PIL import Image
 
-# Swapped to Laplacian for the flat/smooth look
+# Using Laplacian for the flat/smooth look
 from trimesh.smoothing import filter_laplacian
 
 warnings.filterwarnings("ignore", category=RuntimeWarning, message="invalid value encountered in divide")
@@ -206,22 +204,14 @@ def build_threshold_fallbacks(threshold: float) -> list[float]:
 
 
 def resolve_repair_resolution(mc_resolution: int) -> int:
-    return 400
+    return 300
 
 
 def get_adaptive_smoothing_iterations(mesh: trimesh.Trimesh) -> int:
-    """
-    Dynamically calculates the optimal number of Laplacian smoothing iterations.
-    Dense/complex meshes safely absorb more passes to remove blocks.
-    Simple/thin meshes get fewer passes to prevent melting.
-    """
+    """Dynamically calculates the optimal number of Laplacian smoothing iterations."""
     if len(mesh.faces) == 0:
         return 0
-
-    # Heuristic: 1 iteration per 1500 faces
     calculated_iters = int(len(mesh.faces) / 1500)
-
-    # Clamp to ensure it always smooths a little, but never melts the object
     return max(15, min(85, calculated_iters))
 
 
@@ -281,7 +271,7 @@ def generate_mesh_for_image(
     unsmoothed_mesh.export(output_path.parent / f"{input_path.stem}_unsmoothed.glb")
     print(f"        ✓ Completed in {time.time() - t_start:.2f}s")
 
-    print("  [6/8] Smoothing Mesh...")
+    print("  [6/8] Smoothing Mesh")
     t_start = time.time()
     optimal_iters = get_adaptive_smoothing_iterations(mesh)
     print(f"        -> Using {optimal_iters} iterations for {len(mesh.faces):,} faces")
@@ -296,13 +286,32 @@ def generate_mesh_for_image(
     except Exception as e:
         print(f"        ! Decimation skipped: {e}")
 
-    print("  [8/8] Applying rotation and exporting...")
+    print("  [8/8] Applying rotation, cropping original, and exporting...")
     t_start = time.time()
     mesh = to_gradio_3d_orientation(mesh)
 
     mesh.export(output_path)
 
-    shutil.copy(input_path, output_path.parent / f"{input_path.stem}_original.png")
+    # --- AUTO CROP ORIGINAL IMAGE ---
+    with Image.open(input_path) as orig:
+        if orig.mode in ("RGBA", "P"):
+            orig = orig.convert("RGBA")
+            background = Image.new("RGBA", orig.size, (255, 255, 255, 255))
+            orig = Image.alpha_composite(background, orig).convert("RGB")
+        else:
+            orig = orig.convert("RGB")
+
+        w, h = orig.size
+        sq_size = min(w, h)
+        left = (w - sq_size) // 2
+        top = (h - sq_size) // 2
+
+        # Center crop the largest possible square
+        orig_cropped = orig.crop((left, top, left + sq_size, top + sq_size))
+        # Resize to exactly 1024x1024 to perfectly match the 3D previews
+        orig_resized = orig_cropped.resize((1024, 1024), Image.Resampling.LANCZOS)
+        orig_resized.save(output_path.parent / f"{input_path.stem}_original.png")
+
     final_input.save(output_path.parent / f"{input_path.stem}_edited.png")
 
     print(f"        ✓ Completed in {time.time() - t_start:.2f}s")
