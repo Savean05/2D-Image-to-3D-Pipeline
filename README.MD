@@ -13,18 +13,56 @@ A primary goal of this pipeline is maintaining high fidelity between the 2D sour
 
 ### Full Comparison Gallery
 
-|                        Input Image (2D Processed)                         |                        Generated Preview (3D)                         |
-|:-------------------------------------------------------------------------:|:---------------------------------------------------------------------:|
-|    <img src="TripoSR/outputs/bed_in_room/bed_in_room.png" style="max-width: 400px; height: auto;">    |  <img src="TripoSR/outputs/bed_in_room/3d_preview.png" style="max-width: 400px; height: auto;">   |
-|         <img src="TripoSR/outputs/bottle/bottle.png" style="max-width: 400px; height: auto;">         |     <img src="TripoSR/outputs/bottle/3d_preview.png" style="max-width: 400px; height: auto;">     |
-|         <img src="TripoSR/outputs/goblin/goblin.png" style="max-width: 400px; height: auto;">         |     <img src="TripoSR/outputs/goblin/3d_preview.png" style="max-width: 400px; height: auto;">     |
-|    <img src="TripoSR/outputs/green_couch/green_couch.png" style="max-width: 400px; height: auto;">    |  <img src="TripoSR/outputs/green_couch/3d_preview.png" style="max-width: 400px; height: auto;">   |
-|         <img src="TripoSR/outputs/person/person.png" style="max-width: 400px; height: auto;">         |     <img src="TripoSR/outputs/person/3d_preview.png" style="max-width: 400px; height: auto;">     |
-|      <img src="TripoSR/outputs/red_apple/red_apple.png" style="max-width: 400px; height: auto;">      |   <img src="TripoSR/outputs/red_apple/3d_preview.png" style="max-width: 400px; height: auto;">    |
-|        <img src="TripoSR/outputs/reptile/reptile.png" style="max-width: 400px; height: auto;">        |    <img src="TripoSR/outputs/reptile/3d_preview.png" style="max-width: 400px; height: auto;">     |
-|        <img src="TripoSR/outputs/shotgun/shotgun.png" style="max-width: 400px; height: auto;">        |    <img src="TripoSR/outputs/shotgun/3d_preview.png" style="max-width: 400px; height: auto;">     |
-| <img src="TripoSR/outputs/water_fountain/water_fountain.png" style="max-width: 400px; height: auto;"> | <img src="TripoSR/outputs/water_fountain/3d_preview.png" style="max-width: 400px; height: auto;"> |
-|     <img src="TripoSR/outputs/wood_chair/wood_chair.png" style="max-width: 400px; height: auto;">     |   <img src="TripoSR/outputs/wood_chair/3d_preview.png" style="max-width: 400px; height: auto;">   |
+<table>
+  <thead>
+    <tr>
+      <th width="50%">Input Image (2D Processed)</th>
+      <th width="50%">Generated Preview (3D)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><img src="TripoSR/outputs/bed_in_room/bed_in_room.png" style="width: 100%; max-width: 400px; display: block; margin: auto;"></td>
+      <td><img src="TripoSR/outputs/bed_in_room/3d_preview.png" style="width: 100%; max-width: 400px; display: block; margin: auto;"></td>
+    </tr>
+    <tr>
+      <td><img src="TripoSR/outputs/bottle/bottle.png" style="width: 100%; max-width: 400px; display: block; margin: auto;"></td>
+      <td><img src="TripoSR/outputs/bottle/3d_preview.png" style="width: 100%; max-width: 400px; display: block; margin: auto;"></td>
+    </tr>
+    <tr>
+      <td><img src="TripoSR/outputs/goblin/goblin.png" style="width: 100%; max-width: 400px; display: block; margin: auto;"></td>
+      <td><img src="TripoSR/outputs/goblin/3d_preview.png" style="width: 100%; max-width: 400px; display: block; margin: auto;"></td>
+    </tr>
+    <tr>
+      <td><img src="TripoSR/outputs/green_couch/green_couch.png" style="width: 100%; max-width: 400px; display: block; margin: auto;"></td>
+      <td><img src="TripoSR/outputs/green_couch/3d_preview.png" style="width: 100%; max-width: 400px; display: block; margin: auto;"></td>
+    </tr>
+    <tr>
+      <td><img src="TripoSR/outputs/person/person.png" style="width: 100%; max-width: 400px; display: block; margin: auto;"></td>
+      <td><img src="TripoSR/outputs/person/3d_preview.png" style="width: 100%; max-width: 400px; display: block; margin: auto;"></td>
+    </tr>
+    <tr>
+      <td><img src="TripoSR/outputs/red_apple/red_apple.png" style="width: 100%; max-width: 400px; display: block; margin: auto;"></td>
+      <td><img src="TripoSR/outputs/red_apple/3d_preview.png" style="width: 100%; max-width: 400px; display: block; margin: auto;"></td>
+    </tr>
+    <tr>
+      <td><img src="TripoSR/outputs/reptile/reptile.png" style="width: 100%; max-width: 400px; display: block; margin: auto;"></td>
+      <td><img src="TripoSR/outputs/reptile/3d_preview.png" style="width: 100%; max-width: 400px; display: block; margin: auto;"></td>
+    </tr>
+    <tr>
+      <td><img src="TripoSR/outputs/shotgun/shotgun.png" style="width: 100%; max-width: 400px; display: block; margin: auto;"></td>
+      <td><img src="TripoSR/outputs/shotgun/3d_preview.png" style="width: 100%; max-width: 400px; display: block; margin: auto;"></td>
+    </tr>
+    <tr>
+      <td><img src="TripoSR/outputs/water_fountain/water_fountain.png" style="width: 100%; max-width: 400px; display: block; margin: auto;"></td>
+      <td><img src="TripoSR/outputs/water_fountain/3d_preview.png" style="width: 100%; max-width: 400px; display: block; margin: auto;"></td>
+    </tr>
+    <tr>
+      <td><img src="TripoSR/outputs/wood_chair/wood_chair.png" style="width: 100%; max-width: 400px; display: block; margin: auto;"></td>
+      <td><img src="TripoSR/outputs/wood_chair/3d_preview.png" style="width: 100%; max-width: 400px; display: block; margin: auto;"></td>
+    </tr>
+  </tbody>
+</table>
 
 *(Note: The 3D previews above are generated automatically using the `take_pictures.py` tool included in this repo. You must run the generator and the preview tool to see these results.)*
 
